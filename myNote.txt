@@ -1,0 +1,7 @@
+web link: https://bitbucket.org/woalsdnd/v-gan
+
+Paper: Retinal Vessel Segmentation in Fundoscopic Images with Generative Adversarial Networks
+
+Keras and tensorflow
+
+dataset: DRIVE, STARE

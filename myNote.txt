@@ -1,4 +1,5 @@
 web link: https://bitbucket.org/woalsdnd/v-gan
+  - have result from other state-of-the-art in result folder
 
 Paper: Retinal Vessel Segmentation in Fundoscopic Images with Generative Adversarial Networks
 

@@ -6,3 +6,37 @@ Paper: Retinal Vessel Segmentation in Fundoscopic Images with Generative Adversa
 Keras and tensorflow
 
 dataset: DRIVE, STARE
+
+Others code:
+[1] https://github.com/zhangqianhui/AdversarialNetsPapers
+  >> The classical papers and codes about generative adversarial nets
+  
+[2] https://github.com/oyam/Semantic-Segmentation-using-Adversarial-Networks
+  >> Chainer Implementation of Semantic Segmentation using Adversarial Networks https://arxiv.org/abs/1611.08408
+
+[3] Keras, FCN
+https://github.com/aurora95/Keras-FCN
+  - Keras-tensorflow implementation of Fully Convolutional Networks for Semantic Segmentation
+
+[4] Keras, GAN
+https://github.com/bstriner/keras-adversarial  
+  - a tool for combining multiple keras models into a single training function and a single call to the GPU.
+  - GANs made easy!
+https://bitbucket.org/woalsdnd/v-gan
+  - Paper: Retinal Vessel Segmentation in Fundoscopic Images with Generative Adversarial Networks
+  - Keras and tensorflow implementation
+https://github.com/tatsy/keras-generative
+  - Keras implementation of various deep generative networks such as VAE and GAN.
+
+[5] Keras, AutoEncoder
+https://github.com/Rentier/keras-autoencoder
+  - A collection of different autoencoder types in Keras. 
+  - It is inspired by: https://blog.keras.io/building-autoencoders-in-keras.html
+
+[6] TensoFlow, Image Segmentation Framework
+https://github.com/ahundt/tf-image-segmentation/tree/ahundt-keras
+- Image Segmentation framework based on Tensorflow and TF-Slim library
+
+[7] Torch
+https://github.com/mohitsharma916/Adversarial-Semisupervised-Semantic-Segmentation
+(Entry for ICLR 2018 Reproducibility Challenge)

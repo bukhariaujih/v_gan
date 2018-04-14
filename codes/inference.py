@@ -5,7 +5,7 @@ from .utils import *
 import numpy as np
 
 # set filepath
-datasets=["DRIVE","STARE"]
+datasets=["DRIVE", "STARE"]
 fundus_dir="../data/{}/test/images/"
 mask_dir="../data/{}/test/mask/"
 out_dir="../inference_outputs/{}"

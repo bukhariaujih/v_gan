@@ -2,8 +2,8 @@ import numpy as np
 import os, sys
 
 #sys.path.insert(0, 'C:\\Users\\User\PycharmProjects\\vessel_gan\\v-gan')
-from .model import GAN, discriminator_pixel, discriminator_image, discriminator_patch1, discriminator_patch2, generator, discriminator_dummy, pretrain_g
-from .utils import *
+from model import GAN, discriminator_pixel, discriminator_image, discriminator_patch1, discriminator_patch2, generator, discriminator_dummy, pretrain_g
+from utils import *
 from PIL import Image
 import argparse
 from keras import backend as K
@@ -43,8 +43,9 @@ parser.add_argument(
     )
 FLAGS,_= parser.parse_known_args()
 
-# training settings 
-os.environ['CUDA_VISIBLE_DEVICES']=FLAGS.gpu_index  # TODO: tensorflow by default will used gpu
+# training settings
+print('training setting.')
+os.environ['CUDA_VISIBLE_DEVICES']=FLAGS.gpu_index
 n_rounds=10
 batch_size=FLAGS.batch_size
 n_filters_d=32
@@ -57,13 +58,14 @@ alpha_recip=1./FLAGS.ratio_gan2seg if FLAGS.ratio_gan2seg>0 else 0
 rounds_for_evaluation=range(n_rounds)
 
 # set dataset
+print('set dataset.')
 dataset=FLAGS.dataset
 img_size= (640,640) if dataset=='DRIVE' else (720,720) # (h,w)  [original img size => DRIVE : (584, 565), STARE : (605,700) ]
 img_out_dir="{}/segmentation_results_{}_{}".format(FLAGS.dataset,FLAGS.discriminator,FLAGS.ratio_gan2seg)
 model_out_dir="{}/model_{}_{}".format(FLAGS.dataset,FLAGS.discriminator,FLAGS.ratio_gan2seg)
 auc_out_dir="{}/auc_{}_{}".format(FLAGS.dataset,FLAGS.discriminator,FLAGS.ratio_gan2seg)
-train_dir="../data/{}/training/".format(dataset)
-test_dir="../data/{}/test/".format(dataset)
+train_dir=  "/home/deeplearning/Desktop/Bukhari/{}/training/".format(dataset)  # "../data/{}/training/".format(dataset)
+test_dir="/home/deeplearning/Desktop/Bukhari/{}/test/".format(dataset)  # ""../data/{}/test/".format(dataset)
 if not os.path.isdir(img_out_dir):
     os.makedirs(img_out_dir)
 if not os.path.isdir(model_out_dir):
@@ -72,6 +74,7 @@ if not os.path.isdir(auc_out_dir):
     os.makedirs(auc_out_dir)
  
 # set training and validation dataset
+print('set training and validation dataset')
 train_imgs, train_vessels =get_imgs(train_dir, augmentation=True, img_size=img_size, dataset=dataset)
 train_vessels=np.expand_dims(train_vessels, axis=3)
 n_all_imgs=train_imgs.shape[0]
@@ -83,6 +86,7 @@ val_imgs, val_vessels=train_imgs[np.delete(range(n_all_imgs),train_indices),...]
 test_imgs, test_vessels, test_masks=get_imgs(test_dir, augmentation=False, img_size=img_size, dataset=dataset, mask=True)
 
 # create networks
+print('create networks.')
 g = generator(img_size, n_filters_g) 
 if FLAGS.discriminator=='pixel':
     d, d_out_shape = discriminator_pixel(img_size, n_filters_d,init_lr)
@@ -96,7 +100,7 @@ else:
     d, d_out_shape = discriminator_dummy(img_size, n_filters_d,init_lr)
 
 make_trainable(d, False)
-gan=GAN(g,d,img_size, n_filters_g, n_filters_d,alpha_recip, init_lr)
+gan=GAN(g,d,img_size, n_filters_g, n_filters_d,alpha_recip, init_lr)  # TODO: GAN
 generator=pretrain_g(g, img_size, n_filters_g, init_lr)
 g.summary()
 d.summary()
@@ -105,6 +109,7 @@ with open(os.path.join(model_out_dir,"g_{}_{}.json".format(FLAGS.discriminator,F
     f.write(g.to_json())
         
 # start training
+print('start training.')
 scheduler=Scheduler(n_train_imgs//batch_size, n_train_imgs//batch_size, schedules, init_lr) if alpha_recip>0 else Scheduler(0, n_train_imgs//batch_size, schedules, init_lr)
 print("training {} images :".format(n_train_imgs))
 for n_round in range(n_rounds):

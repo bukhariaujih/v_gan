@@ -15,7 +15,7 @@ from keras.optimizers import Adam
 os.environ['KERAS_BACKEND'] = 'tensorflow'
 K.set_image_dim_ordering('tf')
 
-def generator(img_size, n_filters, name='g'):
+def generator(img_size, n_filters, name='g'):  # TODO: use B-VAE
     """
     generate network based on unet
     """    

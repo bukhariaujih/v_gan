@@ -29,6 +29,8 @@ def generator(img_size, n_filters, name='g'):  # TODO: use B-VAE
     padding='same'
     
     inputs = Input((img_height, img_width, img_ch))  # TODO: we can specify the channel location ??
+
+    # TODO: Recognition
     conv1 = Conv2D(n_filters, (k, k), padding=padding)(inputs)
     conv1 = BatchNormalization(scale=False, axis=3)(conv1)
     conv1 = Activation('relu')(conv1)    
@@ -67,7 +69,8 @@ def generator(img_size, n_filters, name='g'):  # TODO: use B-VAE
     conv5 = Conv2D(16*n_filters, (k, k),  padding=padding)(conv5)
     conv5 = BatchNormalization(scale=False, axis=3)(conv5)
     conv5 = Activation('relu')(conv5)
-    
+
+    # TODO: Generator
     up1 = Concatenate(axis=3)([UpSampling2D(size=(s, s))(conv5), conv4])
     conv6 = Conv2D(8*n_filters, (k, k),  padding=padding)(up1)
     conv6 = BatchNormalization(scale=False, axis=3)(conv6)

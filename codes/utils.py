@@ -94,7 +94,7 @@ def discriminator_shape(n, d_out_shape):
 def input2discriminator(real_img_patches, real_vessel_patches, fake_vessel_patches, d_out_shape):
     real=np.concatenate((real_img_patches,real_vessel_patches), axis=3)
     fake=np.concatenate((real_img_patches,fake_vessel_patches), axis=3)
-    
+
     d_x_batch=np.concatenate((real,fake), axis=0)
     
     # real : 1, fake : 0

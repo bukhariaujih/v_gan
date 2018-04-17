@@ -1,13 +1,16 @@
 import numpy as np
 import os, sys
 
-#sys.path.insert(0, 'C:\\Users\\User\PycharmProjects\\vessel_gan\\v-gan')
 from model import GAN, discriminator_pixel, discriminator_image, discriminator_patch1, discriminator_patch2, generator, discriminator_dummy, pretrain_g
 from utils import *
 from PIL import Image
 import argparse
 from keras import backend as K
 
+"""
+ python train.py --ratio_gan2seg=10 --gpu_index=0 --batch_size=8 --dataset=DRIVE --discriminator=image
+
+"""
 
 # arrange arguments
 parser=argparse.ArgumentParser()
@@ -41,7 +44,7 @@ parser.add_argument(
     help="dataset name",
     required=True
     )
-FLAGS,_= parser.parse_known_args()
+FLAGS, _ = parser.parse_known_args()
 
 # training settings
 print('training setting.')
@@ -60,7 +63,7 @@ rounds_for_evaluation=range(n_rounds)
 # set dataset
 print('set dataset.')
 dataset=FLAGS.dataset
-img_size= (640,640) if dataset=='DRIVE' else (720,720) # (h,w)  [original img size => DRIVE : (584, 565), STARE : (605,700) ]
+img_size= (640,640) if dataset=='DRIVE' else (720, 720)  # (h,w)[original img size => DRIVE:(584, 565), STARE:(605,700)]
 img_out_dir="{}/segmentation_results_{}_{}".format(FLAGS.dataset,FLAGS.discriminator,FLAGS.ratio_gan2seg)
 model_out_dir="{}/model_{}_{}".format(FLAGS.dataset,FLAGS.discriminator,FLAGS.ratio_gan2seg)
 auc_out_dir="{}/auc_{}_{}".format(FLAGS.dataset,FLAGS.discriminator,FLAGS.ratio_gan2seg)
@@ -75,7 +78,7 @@ if not os.path.isdir(auc_out_dir):
  
 # set training and validation dataset
 print('set training and validation dataset')
-train_imgs, train_vessels =get_imgs(train_dir, augmentation=True, img_size=img_size, dataset=dataset)
+train_imgs, train_vessels =get_imgs(train_dir, augmentation=False, img_size=img_size, dataset=dataset)
 train_vessels=np.expand_dims(train_vessels, axis=3)
 n_all_imgs=train_imgs.shape[0]
 n_train_imgs=int((1-val_ratio)*n_all_imgs)
@@ -102,9 +105,9 @@ else:
 make_trainable(d, False)
 gan=GAN(g,d,img_size, n_filters_g, n_filters_d,alpha_recip, init_lr)  # TODO: GAN
 generator=pretrain_g(g, img_size, n_filters_g, init_lr)
-g.summary()
-d.summary()
-gan.summary() 
+# g.summary()
+# d.summary()
+# gan.summary()
 with open(os.path.join(model_out_dir,"g_{}_{}.json".format(FLAGS.discriminator,FLAGS.ratio_gan2seg)),'w') as f:
     f.write(g.to_json())
         
@@ -114,14 +117,18 @@ scheduler=Scheduler(n_train_imgs//batch_size, n_train_imgs//batch_size, schedule
 print("training {} images :".format(n_train_imgs))
 for n_round in range(n_rounds):
     
-    # train D
+    # train Dexit
+    print("Round {}: train D".format(n_round))
     make_trainable(d, True)
     for i in range(scheduler.get_dsteps()):
+        print("Here ???")
         real_imgs, real_vessels = next(train_batch_fetcher)
+        print("Or Here ???")
         d_x_batch, d_y_batch = input2discriminator(real_imgs, real_vessels, g.predict(real_imgs,batch_size=batch_size), d_out_shape)
         loss, acc = d.train_on_batch(d_x_batch, d_y_batch)
   
     # train G (freeze discriminator)
+    print("Round {}: train G while freezing D".format(n_round))
     make_trainable(d, False)
     for i in range(scheduler.get_gsteps()):
         real_imgs, real_vessels = next(train_batch_fetcher)
@@ -129,6 +136,7 @@ for n_round in range(n_rounds):
         loss, acc = gan.train_on_batch(g_x_batch, g_y_batch)        
   
     # evaluate on validation set
+    print("Round {}: evaluate the trained model on validation set".format(n_round))
     if n_round in rounds_for_evaluation:
         # D
         d_x_test, d_y_test=input2discriminator(val_imgs, val_vessels, g.predict(val_imgs,batch_size=batch_size), d_out_shape)
@@ -140,6 +148,7 @@ for n_round in range(n_rounds):
         print_metrics(n_round+1, acc=acc, loss=loss, type='GAN')
         
         # save the weights
+        print("Round {}: save the weigth".format(n_round))
         g.save_weights(os.path.join(model_out_dir,"g_{}_{}_{}.h5".format(n_round,FLAGS.discriminator,FLAGS.ratio_gan2seg)))
        
     # update step sizes, learning rates

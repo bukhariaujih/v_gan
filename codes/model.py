@@ -15,7 +15,7 @@ from keras.optimizers import Adam
 os.environ['KERAS_BACKEND'] = 'tensorflow'
 K.set_image_dim_ordering('tf')
 
-def generator(img_size, n_filters, name='g'):  # TODO: use B-VAE
+def generator(img_size, n_filters, name='g'):
     """
     generate network based on unet
     """    
@@ -28,9 +28,7 @@ def generator(img_size, n_filters, name='g'):  # TODO: use B-VAE
     img_height, img_width = img_size[0], img_size[1]
     padding='same'
     
-    inputs = Input((img_height, img_width, img_ch))  # TODO: we can specify the channel location ??
-
-    # TODO: Recognition
+    inputs = Input((img_height, img_width, img_ch))
     conv1 = Conv2D(n_filters, (k, k), padding=padding)(inputs)
     conv1 = BatchNormalization(scale=False, axis=3)(conv1)
     conv1 = Activation('relu')(conv1)    
@@ -39,7 +37,7 @@ def generator(img_size, n_filters, name='g'):  # TODO: use B-VAE
     conv1 = Activation('relu')(conv1)    
     pool1 = MaxPooling2D(pool_size=(s, s))(conv1)
     
-    conv2 = Conv2D(2*n_filters, (k, k),  padding=padding)(pool1)  # TODO: n_filters
+    conv2 = Conv2D(2*n_filters, (k, k),  padding=padding)(pool1)
     conv2 = BatchNormalization(scale=False, axis=3)(conv2)
     conv2 = Activation('relu')(conv2)    
     conv2 = Conv2D(2*n_filters, (k, k),  padding=padding)(conv2)
@@ -69,8 +67,7 @@ def generator(img_size, n_filters, name='g'):  # TODO: use B-VAE
     conv5 = Conv2D(16*n_filters, (k, k),  padding=padding)(conv5)
     conv5 = BatchNormalization(scale=False, axis=3)(conv5)
     conv5 = Activation('relu')(conv5)
-
-    # TODO: Generator
+    
     up1 = Concatenate(axis=3)([UpSampling2D(size=(s, s))(conv5), conv4])
     conv6 = Conv2D(8*n_filters, (k, k),  padding=padding)(up1)
     conv6 = BatchNormalization(scale=False, axis=3)(conv6)

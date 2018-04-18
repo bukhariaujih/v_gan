@@ -1,4 +1,4 @@
-from .utils import *
+import utils
 import os
 from PIL import Image
 import numpy as np
@@ -13,13 +13,13 @@ testdata="../data/{}/test/images"
 
 # draw 
 result_dir="../results"
-datasets=all_files_under(result_dir)
+datasets=utils.all_files_under(result_dir)
 for dataset in datasets:
-    all_results=all_files_under(dataset)
+    all_results=utils.all_files_under(dataset)
     mask_dir=os.path.join(dataset,"mask")
-    masks=load_images_under_dir(mask_dir)/255
+    masks=utils.load_images_under_dir(mask_dir)/255
     gt_dir=os.path.join(dataset,"1st_manual")
-    gt_vessels=load_images_under_dir(gt_dir)/255
+    gt_vessels=utils.load_images_under_dir(gt_dir)/255
     
     # collect results from all methods
     methods=[]
@@ -27,15 +27,15 @@ for dataset in datasets:
     for result in all_results:
         if ("mask" not in result):    #skip mask and ground truth
             # get pixels inside the field of view in fundus images
-            pred_vessels=load_images_under_dir(result)/255
-            gt_vessels_in_mask, pred_vessels_in_mask = pixel_values_in_mask(gt_vessels, pred_vessels , masks)
+            pred_vessels=utils.load_images_under_dir(result)/255
+            gt_vessels_in_mask, pred_vessels_in_mask = utils.pixel_values_in_mask(gt_vessels, pred_vessels , masks)
              
             # visualize results
             if "V-GAN" in result or "DRIU" in result or "1st_manual" in result:
                 test_dir=testdata.format(os.path.basename(dataset))
-                ori_imgs=load_images_under_dir(test_dir)
+                ori_imgs=utils.load_images_under_dir(test_dir)
                 vessels_dir=vessels_out.format(os.path.basename(dataset),os.path.basename(result))
-                filenames=all_files_under(result)
+                filenames=utils.all_files_under(result)
                 if not os.path.isdir(vessels_dir):
                     os.makedirs(vessels_dir)   
                 for index in range(gt_vessels.shape[0]):
@@ -43,7 +43,7 @@ for dataset in datasets:
 #                                                                   np.expand_dims(pred_vessels[index,...], axis=0),
 #                                                                   np.expand_dims(masks[index,...], axis=0), 
 #                                                                   flatten=False)*255
-                    thresholded_vessel=threshold_by_otsu(np.expand_dims(pred_vessels[index,...], axis=0),
+                    thresholded_vessel=utils.threshold_by_otsu(np.expand_dims(pred_vessels[index,...], axis=0),
                                                                   np.expand_dims(masks[index,...], axis=0), 
                                                                   flatten=False)*255
                     ori_imgs[index,...][np.squeeze(thresholded_vessel, axis=0)==0]=(0,0,0)
@@ -56,7 +56,7 @@ for dataset in datasets:
                     os.makedirs(comp_dir)
                 dice_list=[]
                 for index in range(gt_vessels.shape[0]):
-                    diff_map, dice_coeff=difference_map(gt_vessels[index,...], pred_vessels[index,...], masks[index,...])
+                    diff_map, dice_coeff=utils.difference_map(gt_vessels[index,...], pred_vessels[index,...], masks[index,...])
                     dice_list.append(dice_coeff)
                     Image.fromarray(diff_map.astype(np.uint8)).save(os.path.join(comp_dir,os.path.basename(filenames[index])))
 #                 print "indices of best dice coeff : {}".format(sorted(range(len(dice_list)),key=lambda k: dice_list[k]))
@@ -64,9 +64,9 @@ for dataset in datasets:
             # skip the ground truth
             if "1st_manual" not in result:
                 # print metrics
-                print("-- {} --".format(os.path.basename(result)))
-                print("dice coefficient : {}".format(dice_coefficient(gt_vessels,pred_vessels, masks)))
-                print("f1 score : {}, accuracy : {}, sensitivity : {}, specificity : {}".format(*misc_measures_evaluation(gt_vessels,pred_vessels, masks)))
+                print "-- {} --".format(os.path.basename(result))
+                print "dice coefficient : {}".format(utils.dice_coefficient(gt_vessels,pred_vessels, masks))
+                print "f1 score : {}, accuracy : {}, sensitivity : {}, specificity : {}".format(*utils.misc_measures_evaluation(gt_vessels,pred_vessels, masks))
  
                 # compute false positive rate, true positive graph
                 method=os.path.basename(result)
@@ -78,7 +78,7 @@ for dataset in datasets:
                     prec=1.*cm[1,1]/(cm[0,1]+cm[1,1])
                     recall=tpr
                     if method=='2nd_manual':
-                        human_op_pts_roc, human_op_pts_pr = operating_pts_human_experts(gt_vessels, pred_vessels, masks)
+                        human_op_pts_roc, human_op_pts_pr = utils.operating_pts_human_experts(gt_vessels, pred_vessels, masks)
                 else:
                     fpr, tpr, _ = roc_curve(gt_vessels_in_mask, pred_vessels_in_mask)
                     prec, recall, _ = precision_recall_curve(gt_vessels_in_mask, pred_vessels_in_mask)
@@ -92,5 +92,5 @@ for dataset in datasets:
     if not os.path.isdir(curve_dir):
         os.makedirs(curve_dir)
     
-    plot_AUC_ROC(fprs, tprs, methods, curve_dir, human_op_pts_roc)
-    plot_AUC_PR(precs, recalls, methods, curve_dir, human_op_pts_pr)
+    utils.plot_AUC_ROC(fprs, tprs, methods, curve_dir, human_op_pts_roc)
+    utils.plot_AUC_PR(precs, recalls, methods, curve_dir, human_op_pts_pr)    

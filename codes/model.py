@@ -11,6 +11,8 @@ from keras.layers.normalization import BatchNormalization
 from keras.models import Model
 from keras.optimizers import Adam
 
+import tensorflow as tf
+
 
 os.environ['KERAS_BACKEND'] = 'tensorflow'
 K.set_image_dim_ordering('tf')
@@ -29,6 +31,7 @@ def generator(img_size, n_filters, name='g'):
     padding='same'
     
     inputs = Input((img_height, img_width, img_ch))
+    # TODO: Recognition
     conv1 = Conv2D(n_filters, (k, k), padding=padding)(inputs)
     conv1 = BatchNormalization(scale=False, axis=3)(conv1)
     conv1 = Activation('relu')(conv1)    
@@ -42,41 +45,42 @@ def generator(img_size, n_filters, name='g'):
     conv2 = Activation('relu')(conv2)    
     conv2 = Conv2D(2*n_filters, (k, k),  padding=padding)(conv2)
     conv2 = BatchNormalization(scale=False, axis=3)(conv2)
-    conv2 = Activation('relu')(conv2)    
+    conv2 = Activation('relu')(conv2)
     pool2 = MaxPooling2D(pool_size=(s, s))(conv2)
-     
+
     conv3 = Conv2D(4*n_filters, (k, k),  padding=padding)(pool2)
     conv3 = BatchNormalization(scale=False, axis=3)(conv3)
     conv3 = Activation('relu')(conv3)    
     conv3 = Conv2D(4*n_filters, (k, k),  padding=padding)(conv3)
     conv3 = BatchNormalization(scale=False, axis=3)(conv3)
-    conv3 = Activation('relu')(conv3)    
+    conv3 = Activation('relu')(conv3)
     pool3 = MaxPooling2D(pool_size=(s, s))(conv3)
-    
+
     conv4 = Conv2D(8*n_filters, (k, k),  padding=padding)(pool3)
     conv4 = BatchNormalization(scale=False, axis=3)(conv4)
-    conv4 = Activation('relu')(conv4)    
+    conv4 = Activation('relu')(conv4)
     conv4 = Conv2D(8*n_filters, (k, k),  padding=padding)(conv4)
     conv4 = BatchNormalization(scale=False, axis=3)(conv4)
-    conv4 = Activation('relu')(conv4)    
-    pool4 = MaxPooling2D(pool_size=(s, s))(conv4)
-    
+    conv4 = Activation('relu')(conv4)
+    """pool4 = MaxPooling2D(pool_size=(s, s))(conv4)
+
     conv5 = Conv2D(16*n_filters, (k, k),  padding=padding)(pool4)
     conv5 = BatchNormalization(scale=False, axis=3)(conv5)
     conv5 = Activation('relu')(conv5)    
     conv5 = Conv2D(16*n_filters, (k, k),  padding=padding)(conv5)
     conv5 = BatchNormalization(scale=False, axis=3)(conv5)
     conv5 = Activation('relu')(conv5)
-    
+
+    # TODO: Generation
     up1 = Concatenate(axis=3)([UpSampling2D(size=(s, s))(conv5), conv4])
     conv6 = Conv2D(8*n_filters, (k, k),  padding=padding)(up1)
     conv6 = BatchNormalization(scale=False, axis=3)(conv6)
     conv6 = Activation('relu')(conv6)    
     conv6 = Conv2D(8*n_filters, (k, k),  padding=padding)(conv6)
     conv6 = BatchNormalization(scale=False, axis=3)(conv6)
-    conv6 = Activation('relu')(conv6)    
-     
-    up2 = Concatenate(axis=3)([UpSampling2D(size=(s, s))(conv6), conv3])
+    conv6 = Activation('relu')(conv6)
+    """
+    up2 = Concatenate(axis=3)([UpSampling2D(size=(s, s))(conv4), conv3])  #(conv6), conv3])
     conv7 = Conv2D(4*n_filters, (k, k),  padding=padding)(up2)
     conv7 = BatchNormalization(scale=False, axis=3)(conv7)
     conv7 = Activation('relu')(conv7)    
@@ -101,8 +105,9 @@ def generator(img_size, n_filters, name='g'):
     conv9 = Activation('relu')(conv9)
     
     outputs = Conv2D(out_ch, (1, 1), padding=padding, activation='sigmoid')(conv9)
-    
-    g = Model(inputs, outputs, name=name)
+
+    with tf.device('/cpu:0'):  # TODO: Test
+        g = Model(inputs, outputs, name=name)
 
     return g
 
@@ -128,10 +133,11 @@ def discriminator_pixel(img_size, n_filters, init_lr, name='d'):
     conv3 = Conv2D(4*n_filters, kernel_size=(k, k), padding="same")(conv2) 
     conv3 = LeakyReLU(0.2)(conv3)
 
-    conv4 =  Conv2D(out_ch, kernel_size=(1, 1), padding="same")(conv3)
+    conv4 = Conv2D(out_ch, kernel_size=(1, 1), padding="same")(conv3)
     outputs = Activation('sigmoid')(conv4)
 
-    d = Model(inputs, outputs, name=name)
+    with tf.device('/cpu:0'):  # TODO: Test
+        d = Model(inputs, outputs, name=name)
 
     def d_loss(y_true, y_pred):
         L = objectives.binary_crossentropy(K.batch_flatten(y_true),
@@ -376,8 +382,9 @@ def GAN(g,d,img_size,n_filters_g, n_filters_d, alpha_recip, init_lr, name='gan')
     
     fake_vessel=g(fundus)
     fake_pair=Concatenate(axis=3)([fundus, fake_vessel])
-    
-    gan=Model([fundus, vessel], d(fake_pair), name=name)
+
+    with tf.device('/cpu:0'):  # TODO: Test
+        gan=Model([fundus, vessel], d(fake_pair), name=name)
 
     def gan_loss(y_true, y_pred):
         y_true_flat = K.batch_flatten(y_true)
@@ -403,7 +410,9 @@ def pretrain_g(g, img_size, n_filters_g, init_lr):
 
     img_ch=3
     fundus = Input((img_h, img_w, img_ch))
-    generator=Model(fundus, g(fundus))
+
+    with tf.device('/cpu:0'):  # TODO: Test
+        generator=Model(fundus, g(fundus))
 
     def g_loss(y_true, y_pred):
         L_seg = objectives.binary_crossentropy(K.batch_flatten(y_true), K.batch_flatten(y_pred))

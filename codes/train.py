@@ -70,7 +70,7 @@ if not os.path.isdir(auc_out_dir):
     os.makedirs(auc_out_dir)
  
 # set training and validation dataset
-train_imgs, train_vessels =utils.get_imgs(train_dir, augmentation=True, img_size=img_size, dataset=dataset)
+train_imgs, train_vessels =utils.get_imgs(train_dir, augmentation=False, img_size=img_size, dataset=dataset)
 train_vessels=np.expand_dims(train_vessels, axis=3)
 n_all_imgs=train_imgs.shape[0]
 n_train_imgs=int((1-val_ratio)*n_all_imgs)
@@ -96,15 +96,15 @@ else:
 utils.make_trainable(d, False)
 gan=GAN(g,d,img_size, n_filters_g, n_filters_d,alpha_recip, init_lr)
 generator=pretrain_g(g, img_size, n_filters_g, init_lr)
-g.summary()
-d.summary()
-gan.summary() 
+#g.summary()
+#d.summary()
+#gan.summary()
 with open(os.path.join(model_out_dir,"g_{}_{}.json".format(FLAGS.discriminator,FLAGS.ratio_gan2seg)),'w') as f:
     f.write(g.to_json())
         
 # start training
 scheduler=utils.Scheduler(n_train_imgs//batch_size, n_train_imgs//batch_size, schedules, init_lr) if alpha_recip>0 else utils.Scheduler(0, n_train_imgs//batch_size, schedules, init_lr)
-print "training {} images :".format(n_train_imgs)
+print("training {} images :".format(n_train_imgs))
 for n_round in range(n_rounds):
     
     # train D
@@ -112,6 +112,7 @@ for n_round in range(n_rounds):
     for i in range(scheduler.get_dsteps()):
         real_imgs, real_vessels = next(train_batch_fetcher)
         d_x_batch, d_y_batch = utils.input2discriminator(real_imgs, real_vessels, g.predict(real_imgs,batch_size=batch_size), d_out_shape)
+        print("OUT: train_on_batch()")
         loss, acc = d.train_on_batch(d_x_batch, d_y_batch)
   
     # train G (freeze discriminator)
@@ -119,6 +120,7 @@ for n_round in range(n_rounds):
     for i in range(scheduler.get_gsteps()):
         real_imgs, real_vessels = next(train_batch_fetcher)
         g_x_batch, g_y_batch=utils.input2gan(real_imgs, real_vessels, d_out_shape)
+
         loss, acc = gan.train_on_batch(g_x_batch, g_y_batch)        
   
     # evaluate on validation set

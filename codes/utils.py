@@ -46,7 +46,7 @@ def imagefiles2arrs(filenames):
     elif len(img_shape)==2:
         images_arr = np.zeros((len(filenames), img_shape[0], img_shape[1]), dtype=np.float32)
     
-    for file_index in xrange(len(filenames)):
+    for file_index in range(len(filenames)):
         img = Image.open(filenames[file_index])
         images_arr[file_index] = np.asarray(img).astype(np.float32)
     
@@ -110,10 +110,10 @@ def input2gan(real_img_patches, real_vessel_patches, d_out_shape):
     return g_x_batch, g_y_batch
     
 def print_metrics(itr, **kargs):
-    print "*** Round {}  ====> ".format(itr),
+    print("*** Round {}  ====> ".format(itr),)
     for name, value in kargs.items():
         print ( "{} : {}, ".format(name, value)),
-    print ""
+    print("")
     sys.stdout.flush()
 
 class TrainBatchFetcher(Iterator):
@@ -149,11 +149,11 @@ def plot_AUC_ROC(fprs,tprs,method_names,fig_dir,op_pts):
     indices=[7,2,5,3,4,6,1,8,0] if len(fprs)==9 else [4,1,2,3,0] 
 
     # print auc  
-    print "****** ROC AUC ******"
-    print "CAVEAT : AUC of V-GAN with 8bit images might be lower than the floating point array (check <home>/pretrained/auc_roc*.npy)"
+    print("****** ROC AUC ******")
+    print("CAVEAT : AUC of V-GAN with 8bit images might be lower than the floating point array (check <home>/pretrained/auc_roc*.npy)")
     for index in indices:
         if method_names[index]!='CRFs' and method_names[index]!='2nd_manual':
-            print "{} : {:04}".format(method_names[index],auc(fprs[index],tprs[index]))
+            print("{} : {:04}".format(method_names[index],auc(fprs[index],tprs[index])))
     
     # plot results
     for index in indices:
@@ -187,11 +187,11 @@ def plot_AUC_PR(precisions, recalls, method_names, fig_dir, op_pts):
     indices=[7,2,5,3,4,6,1,8,0] if len(precisions)==9 else [4,1,2,3,0] 
 
     # print auc  
-    print "****** Precision Recall AUC ******"
-    print "CAVEAT : AUC of V-GAN with 8bit images might be lower than the floating point array (check <home>/pretrained/auc_pr*.npy)"
+    print("****** Precision Recall AUC ******")
+    print("CAVEAT : AUC of V-GAN with 8bit images might be lower than the floating point array (check <home>/pretrained/auc_pr*.npy)")
     for index in indices:
         if method_names[index]!='CRFs' and method_names[index]!='2nd_manual':
-            print "{} : {:04}".format(method_names[index],auc(recalls[index],precisions[index]))
+            print("{} : {:04}".format(method_names[index],auc(recalls[index],precisions[index])))
     
     # plot results
     for index in indices:

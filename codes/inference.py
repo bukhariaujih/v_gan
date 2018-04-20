@@ -28,7 +28,7 @@ for dataset in datasets:
     fundus_files=utils.all_files_under(fundus_dir.format(dataset))
     mask_files=utils.all_files_under(mask_dir.format(dataset))
     for index,fundus_file in enumerate(fundus_files):
-        print "processing {}...".format(fundus_file)
+        print("processing {}...".format(fundus_file))
         # load imgs
         img=utils.imagefiles2arrs([fundus_file])
         mask=utils.imagefiles2arrs([mask_files[index]])

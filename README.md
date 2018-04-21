@@ -4,6 +4,8 @@
 ![bitbucket_header.jpg](https://bitbucket.org/repo/ekyjKAX/images/3167681377-bitbucket_header.jpg)
 
 ## Package Dependency ##
+Packages dependency: 'conda install keras-gpu'
+
 scikit_image==0.12.3  
 numpy==1.12.0  
 matplotlib==2.0.0  

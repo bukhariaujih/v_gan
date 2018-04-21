@@ -58,8 +58,8 @@ test_imgs, test_vessels, test_masks = get_imgs(test_dir,
                                                dataset=dataset,
                                                mask=True)
 
-# create networks TODO: Here, the GPU already filled up (10613MiB)
-g = generator(img_size, n_filters_g)
+# create networks
+g = generator(img_size, n_filters_g) # TODO: In here, the GPU already filled up (10613MiB)
 if discriminator == 'pixel':
     d, d_out_shape = discriminator_pixel(img_size, n_filters_d, init_lr)
 elif discriminator == 'patch1':
@@ -93,7 +93,7 @@ for n_round in range(n_rounds):
         real_imgs, real_vessels = next(train_batch_fetcher)
         d_x_batch, d_y_batch = input2discriminator(real_imgs, real_vessels,
                                                          g.predict(real_imgs, batch_size=batch_size), d_out_shape)
-        loss, acc = d.train_on_batch(d_x_batch, d_y_batch)
+        loss, acc = d.train_on_batch(d_x_batch, d_y_batch)  # TODO: ERROR: 'Allocator (GPU_0_bfc) ran out of memory trying to allocate 1.56GiB'
 
     # train G (freeze discriminator)
     make_trainable(d, False)

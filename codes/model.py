@@ -1,5 +1,11 @@
 import os
 
+# -------------------------- set gpu using tf ---------------------------
+import tensorflow as tf
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True
+session = tf.Session(config=config)
+# -------------------  start importing keras module ---------------------
 from keras import backend as K
 from keras import objectives
 from keras.layers import Conv2D, MaxPooling2D, UpSampling2D, Dense, GlobalAveragePooling2D
@@ -12,7 +18,6 @@ from keras.models import Model
 from keras.optimizers import Adam
 
 import tensorflow as tf
-
 
 os.environ['KERAS_BACKEND'] = 'tensorflow'
 K.set_image_dim_ordering('tf')

@@ -7,6 +7,8 @@ Keras and tensorflow
 
 dataset: DRIVE, STARE
 
+Packages dependency: conda install keras-gpu
+
 #========================================================================================================================#
 
 Others code:

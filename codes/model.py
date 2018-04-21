@@ -62,7 +62,7 @@ def generator(img_size, n_filters, name='g'):
     conv4 = Conv2D(8*n_filters, (k, k),  padding=padding)(conv4)
     conv4 = BatchNormalization(scale=False, axis=3)(conv4)
     conv4 = Activation('relu')(conv4)
-    """pool4 = MaxPooling2D(pool_size=(s, s))(conv4)
+    pool4 = MaxPooling2D(pool_size=(s, s))(conv4)
 
     conv5 = Conv2D(16*n_filters, (k, k),  padding=padding)(pool4)
     conv5 = BatchNormalization(scale=False, axis=3)(conv5)
@@ -79,8 +79,8 @@ def generator(img_size, n_filters, name='g'):
     conv6 = Conv2D(8*n_filters, (k, k),  padding=padding)(conv6)
     conv6 = BatchNormalization(scale=False, axis=3)(conv6)
     conv6 = Activation('relu')(conv6)
-    """
-    up2 = Concatenate(axis=3)([UpSampling2D(size=(s, s))(conv4), conv3])  #(conv6), conv3])
+
+    up2 = Concatenate(axis=3)([UpSampling2D(size=(s, s))(conv6), conv3])
     conv7 = Conv2D(4*n_filters, (k, k),  padding=padding)(up2)
     conv7 = BatchNormalization(scale=False, axis=3)(conv7)
     conv7 = Activation('relu')(conv7)    

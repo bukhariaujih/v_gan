@@ -1,7 +1,6 @@
 import numpy as np
-from .model import GAN, discriminator_pixel, discriminator_image, discriminator_patch1, discriminator_patch2, generator, \
-    discriminator_dummy, pretrain_g
-from .utils import *
+from codes.model import *
+from codes.utils import *
 import os
 from PIL import Image
 import argparse
@@ -9,16 +8,14 @@ from keras import backend as K
 
 # arrange arguments
 ratio_gan2seg=10
-gpu_index=0
+gpu_index='0'
 batch_size=8
 dataset='DRIVE'
 discriminator='pixel'
 
-
 # training settings
 os.environ['CUDA_VISIBLE_DEVICES'] = gpu_index
 n_rounds = 10
-batch_size = batch_size
 n_filters_d = 32
 n_filters_g = 32
 val_ratio = 0.05
@@ -29,14 +26,13 @@ alpha_recip = 1. / ratio_gan2seg if ratio_gan2seg > 0 else 0
 rounds_for_evaluation = range(n_rounds)
 
 # set dataset
-dataset = dataset
 img_size = (640, 640) if dataset == 'DRIVE' else (
 720, 720)  # (h,w)  [original img size => DRIVE : (584, 565), STARE : (605,700) ]
-img_out_dir = "{}/segmentation_results_{}_{}".format(dataset, discriminator, ratio_gan2seg)
-model_out_dir = "{}/model_{}_{}".format(dataset, discriminator, ratio_gan2seg)
-auc_out_dir = "{}/auc_{}_{}".format(dataset, discriminator, ratio_gan2seg)
-train_dir = "../data/{}/training/".format(dataset)
-test_dir = "../data/{}/test/".format(dataset)
+img_out_dir = "/home/deeplearning/PycharmProjects/v_gan/codes/{}/segmentation_results_{}_{}".format(dataset, discriminator, ratio_gan2seg)
+model_out_dir = "/home/deeplearning/PycharmProjects/v_gan/codes/{}/model_{}_{}".format(dataset, discriminator, ratio_gan2seg)
+auc_out_dir = "/home/deeplearning/PycharmProjects/v_gan/codes/{}/auc_{}_{}".format(dataset, discriminator, ratio_gan2seg)
+train_dir = "/home/deeplearning/PycharmProjects/v_gan/data/{}/training/".format(dataset)
+test_dir = "/home/deeplearning/PycharmProjects/v_gan/data/{}/test/".format(dataset)
 if not os.path.isdir(img_out_dir):
     os.makedirs(img_out_dir)
 if not os.path.isdir(model_out_dir):
@@ -54,11 +50,15 @@ train_batch_fetcher = TrainBatchFetcher(train_imgs[train_indices, ...], train_ve
                                               batch_size)
 val_imgs, val_vessels = train_imgs[np.delete(range(n_all_imgs), train_indices), ...], train_vessels[
     np.delete(range(n_all_imgs), train_indices), ...]
-# set test dataset
-test_imgs, test_vessels, test_masks = get_imgs(test_dir, augmentation=False, img_size=img_size, dataset=dataset,
-                                                     mask=True)
 
-# create networks
+# set test dataset
+test_imgs, test_vessels, test_masks = get_imgs(test_dir,
+                                               augmentation=False,
+                                               img_size=img_size,
+                                               dataset=dataset,
+                                               mask=True)
+
+# create networks TODO: Here, the GPU already filled up (10613MiB)
 g = generator(img_size, n_filters_g)
 if discriminator == 'pixel':
     d, d_out_shape = discriminator_pixel(img_size, n_filters_d, init_lr)
@@ -93,7 +93,6 @@ for n_round in range(n_rounds):
         real_imgs, real_vessels = next(train_batch_fetcher)
         d_x_batch, d_y_batch = input2discriminator(real_imgs, real_vessels,
                                                          g.predict(real_imgs, batch_size=batch_size), d_out_shape)
-        print("OUT: train_on_batch()")
         loss, acc = d.train_on_batch(d_x_batch, d_y_batch)
 
     # train G (freeze discriminator)

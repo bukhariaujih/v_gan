@@ -1,5 +1,5 @@
 import numpy as np
-from codes.model import *
+from codes.model import *  # TODO: GPU = 153MiB
 from codes.utils import *
 import os
 from PIL import Image
@@ -59,7 +59,7 @@ test_imgs, test_vessels, test_masks = get_imgs(test_dir,
                                                mask=True)
 
 # create networks
-g = generator(img_size, n_filters_g) # TODO: In here, the GPU already filled up (10613MiB)
+g = generator(img_size, n_filters_g)  # TODO: GPU = 193MiB
 if discriminator == 'pixel':
     d, d_out_shape = discriminator_pixel(img_size, n_filters_d, init_lr)
 elif discriminator == 'patch1':
@@ -92,8 +92,12 @@ for n_round in range(n_rounds):
     for i in range(scheduler.get_dsteps()):
         real_imgs, real_vessels = next(train_batch_fetcher)
         d_x_batch, d_y_batch = input2discriminator(real_imgs, real_vessels,
-                                                         g.predict(real_imgs, batch_size=batch_size), d_out_shape)
-        loss, acc = d.train_on_batch(d_x_batch, d_y_batch)  # TODO: ERROR: 'Allocator (GPU_0_bfc) ran out of memory trying to allocate 1.56GiB'
+                                                         g.predict(real_imgs, batch_size=batch_size), d_out_shape)  # TODO: GPU = 8673MiB
+        # TODO: 'g.predict(real_imgs, batch_size=batch_size)', used GPU=8673MiB
+        K.clear_session()  # TODO: Not work ???
+        # TODO: after 'K,clear_session()', GPU memory still-8673MiB, ONLY clear TF graph, not the graph itself
+        # TODO: Need to clear total GPU memory
+        loss, acc = d.train_on_batch(d_x_batch, d_y_batch)  # TODO: GPU needed > 3000MiB
 
     # train G (freeze discriminator)
     make_trainable(d, False)

@@ -94,10 +94,11 @@ for n_round in range(n_rounds):
         d_x_batch, d_y_batch = input2discriminator(real_imgs, real_vessels,
                                                          g.predict(real_imgs, batch_size=batch_size), d_out_shape)  # TODO: GPU = 8673MiB
         # TODO: 'g.predict(real_imgs, batch_size=batch_size)', used GPU=8673MiB
-        K.clear_session()  # TODO: Not work ???
+        # K.clear_session()  # TODO: Not work ???
         # TODO: after 'K,clear_session()', GPU memory still-8673MiB, ONLY clear TF graph, not the graph itself
         # TODO: Need to clear total GPU memory
         loss, acc = d.train_on_batch(d_x_batch, d_y_batch)  # TODO: GPU needed > 3000MiB
+        # TODO: See "Keras-GAN" example <<---works fine
 
     # train G (freeze discriminator)
     make_trainable(d, False)

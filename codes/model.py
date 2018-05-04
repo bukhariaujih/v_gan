@@ -4,6 +4,8 @@ import os
 import tensorflow as tf
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
+# config.gpu_options.per_process_gpu_memory_fraction = 0.9
+# config.gpu_options.visible_device_list = "0"
 session = tf.Session(config=config)
 # -------------------  start importing keras module ---------------------
 from keras import backend as K
